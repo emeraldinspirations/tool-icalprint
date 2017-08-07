@@ -1,0 +1,18 @@
+{
+    "name": "emeraldinspirations/tool-googlecalendarprint",
+    "description": "A tool to print your Google Calendar events",
+    "type": "tool",
+    "authors": [
+        {
+            "name": "Matthew \"Juniper\" Barlett",
+            "email": "emeraldinspirations@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+    },
+    "autoload": {
+        "psr-4": {
+        }
+    }
+}
