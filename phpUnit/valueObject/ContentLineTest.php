@@ -108,4 +108,64 @@ class ContentLineTest extends \PHPUnit_Framework_TestCase
 
     }
 
+    /**
+     * Verify function escapes the required values inside supplied string
+     *
+     * @return void
+     */
+    public function testEscapeString()
+    {
+        $Tests = [
+            [
+                'Supplied' => 'This is \\ a test',
+                'Expected' => 'This is \\\\ a test',
+                'Failure'  => 'Backslash not escaped',
+            ],
+            [
+                'Supplied' => "This is \\\n a test",
+                'Expected' => 'This is \\\\\\n a test',
+                'Failure'  => 'Backslash - Line Feed not escaped',
+            ],
+            [
+                'Supplied' => "This is \n a test",
+                'Expected' => 'This is \\n a test',
+                'Failure'  => 'Line Feed not escaped',
+            ],
+            [
+                'Supplied' => "This is \r a test",
+                'Expected' => 'This is \\n a test',
+                'Failure'  => 'Carrage Return not escaped',
+            ],
+            [
+                'Supplied' => "This is \r\n a test",
+                'Expected' => 'This is \\n a test',
+                'Failure'  => 'CRLF not escaped',
+            ],
+        ];
+
+        $this->assertTrue(
+            is_string(ContentLine::escapeString('')),
+            'Fails if function doesn\'t exist, returns non-string'
+        );
+
+        foreach ($Tests as $Test) {
+            $this->assertEquals(
+                $Test['Expected'],
+                ContentLine::escapeString($Test['Supplied']),
+                'Fails if ' . $Test['Failure']
+            );
+        }
+
+    }
+
+    // /**
+    //  * Verify function exists
+    //  *
+    //  * @return void
+    //  */
+    // public function testFoldString()
+    // {
+    //     $Source = ''
+    // }
+
 }

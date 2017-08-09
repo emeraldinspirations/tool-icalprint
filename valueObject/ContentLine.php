@@ -68,6 +68,47 @@ class ContentLine
     }
 
     /**
+     * Escape characters in supplied string as needed for Value
+     *
+     * Function will escape `\` as `\\` and cr/lf as `\n
+     *
+     * @param string $Value The string to escape
+     *
+     * @return string
+     */
+    static function escapeString(string $Value) : string
+    {
+        $Filter = [
+            '\\'   => '\\\\',
+            "\r\n" => '\\n',
+            "\n"   => '\\n',
+            "\r"   => '\\n',
+        ];
+
+        return str_replace(
+            array_keys($Filter),
+            array_values($Filter),
+            $Value
+        );
+
+    }
+    //
+    // // First remove backslashes by using them as a delimiter for an array
+    // $Exploded = explode('\\', $Value);
+    //
+    // // Then iterate through the array to extract each of the newline values
+    // foreach($Exploded as &$Segment) {
+    //     $Segment = preg_replace(
+    //         '/(\r\n|\n|\r)/',
+    //         '\\n',
+    //         $Segment
+    //     );
+    // }
+    //
+    // // Put the array back together using double backslashes
+    // return implode('\\\\', $Exploded);
+
+    /**
      * Build new ContentLine value object
      *
      * @param string $Field The content line field name
