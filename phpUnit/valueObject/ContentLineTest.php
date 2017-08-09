@@ -30,6 +30,7 @@ class ContentLineTest extends \PHPUnit_Framework_TestCase
 {
 
     protected $Field;
+    protected $Value;
     protected $Object;
 
     /**
@@ -41,7 +42,8 @@ class ContentLineTest extends \PHPUnit_Framework_TestCase
     {
 
         $this->Object = new ContentLine(
-            $this->Field = microtime()
+            $this->Field = microtime(),
+            $this->Value = microtime()
         );
 
     }
@@ -80,6 +82,27 @@ class ContentLineTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(
             $this->Field,
             $this->Object->getField(),
+            'Fails if value not retained'
+        );
+
+    }
+
+    /**
+     * Verify function exists & returns correct value
+     *
+     * @return void
+     */
+    public function testGetValue()
+    {
+
+        $this->assertTrue(
+            is_string($this->Object->getValue()),
+            'Fails if function doesn\'t exist, returns non-string'
+        );
+
+        $this->assertEquals(
+            $this->Value,
+            $this->Object->getValue(),
             'Fails if value not retained'
         );
 

@@ -45,9 +45,10 @@ class ContentLine
 {
 
     protected $Field;
+    protected $Value;
 
     /**
-     * Return the name of the field
+     * Return the field name of the content line
      *
      * @return string
      */
@@ -57,15 +58,28 @@ class ContentLine
     }
 
     /**
+     * Return the value of the content line
+     *
+     * @return string
+     */
+    public function getValue() : string
+    {
+        return $this->Value;
+    }
+
+    /**
      * Build new ContentLine value object
      *
      * @param string $Field The content line field name
      *
      * @return void
      */
-    public function __construct(string $Field)
-    {
+    public function __construct(
+        string $Field,
+        string $Value
+    ) {
         $this->Field = $Field;
+        $this->Value = $Value;
     }
-    
+
 }
