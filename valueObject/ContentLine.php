@@ -263,7 +263,7 @@ class ContentLine
      */
     static function validateField(string $Field) : string
     {
-        
+
         if (!preg_match('/^[a-zA-Z0-9\-]+$/', $Field)) {
             throw new \InvalidArgumentException(
                 'Unable to recognize field',
@@ -288,6 +288,40 @@ class ContentLine
     ) {
         $this->Field = self::validateField($Field);
         $this->Value = $Value;
+    }
+
+    /**
+     * Build new ContentLine value object from escaped & folded Field / Value
+     *
+     * @param string $ContentLine The line to be parsed
+     *
+     * @return self
+     */
+    public function fromString(string $ContentLine) : self
+    {
+        
+        // Unfold and Unescape content line
+        $UnfoldedAndUnescaped = self::unescapeString(
+            self::unfoldString($ContentLine)
+        );
+
+        try {
+
+            // Split value by colen character
+            list($Field, $Value) = explode(':', $UnfoldedAndUnescaped, 2);
+
+        } catch (\Exception $ex) {
+
+            // If value can't be split, then it has no colen
+            throw new \InvalidArgumentException(
+                'Unable to locate field / value delimiter',
+                1502284965
+            );
+
+        }
+
+        // Construct new instance from the two parts
+        return new self($Field, $Value);
     }
 
     /**

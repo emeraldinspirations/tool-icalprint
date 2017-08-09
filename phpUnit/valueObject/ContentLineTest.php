@@ -493,4 +493,56 @@ class ContentLineTest extends \PHPUnit_Framework_TestCase
         return str_replace([' ','.'], ['-','a'], microtime());
     }
 
+    /**
+     * Verify returns object when valid escaped & folded Field / Value passed
+     *
+     * @return void
+     */
+    public function testFromStringValid()
+    {
+
+        $ExpectedValue = 'This is a test value incliding \\n unesscaped chars '
+            . "\n" . 'as well as folded content to verify that the function'
+            . ' unfolds and esscapes the value correctly';
+
+        $UnparsedString = ContentLine::foldString(
+            ContentLine::escapeString(
+                $this->Field . ':' . $ExpectedValue
+            )
+        );
+
+        $this->assertInstanceOf(
+            ContentLine::class,
+            $this->Object = ContentLine::fromString($UnparsedString),
+            'Fails if function doesn\'t exist or returns wrong type'
+        );
+
+        $this->assertEquals(
+            $this->Field,
+            $this->Object->getField(),
+            'Fails if Field not parsed out correctly'
+        );
+
+        $this->assertEquals(
+            $ExpectedValue,
+            $this->Object->getValue(),
+            'Fails if Value not parsed out correctly'
+        );
+    }
+
+    /**
+     * Verify returns object when valid escaped & folded Field / Value passed
+     *
+     * @expectedException     \InvalidArgumentException
+     * @expectedExceptionCode 1502284965
+     *
+     * @return void
+     */
+    public function testFromStringInvalid()
+    {
+
+        ContentLine::fromString('');
+
+    }
+
 }
