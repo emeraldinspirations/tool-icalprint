@@ -144,9 +144,86 @@ class ContentLine
         //  simply the code, extract the first character.  Then re-prepend it
         //  to the result so the wrap can be the same length throughout.
         $FirstChar = substr($Value, 0, 1);
-        $Array = str_split(substr($Value, 1), $SPLIT_LENGTH);
+        $Array = self::splitMultibyteString(substr($Value, 1), $SPLIT_LENGTH);
 
         return $FirstChar . implode("\n ", $Array);
+    }
+
+    /**
+     * Split string including multibyte chars per octet preserving chars
+     *
+     * When splitting a string using `str_split` that may include multibyte
+     * characters there is the possibility that these multibyte charictars
+     * might be split in the middle of the character.  This procedure splits as
+     * close to the length specified as possible while preserving the multibyte
+     * characters.
+     *
+     * This function will prefer to shorten the length as neccessary to
+     * preserve each multibyte charictar.  If a single multibyte character
+     * exceeds the requested length, it is returned by itself.
+     *
+     * @param string $MultibyteString The string to split
+     * @param int    $Octets          (Optional) The goal number of octets
+     *                                (minimum of 1 octet)
+     *
+     * @throws \InvalidArgumentException If value of Octets passed is < 1
+     *
+     * @see http://php.net/manual/en/function.str-split.php#113274
+     * @see https://gist.github.com/hugowetterberg/81747
+     *
+     * @return array
+     */
+    static function splitMultibyteString(
+        string $MultibyteString,
+        int $Octets = 1
+    ) : array {
+
+        // Throw exception if length less than 1 is passed
+        if ($Octets < 1) {
+            throw new \InvalidArgumentException(
+                'Length must be 1 or greater',
+                1502275279
+            );
+        }
+
+        // Split into array with each unicode char as it's own element
+        $MultibyteArray = preg_split(
+            '~~u',
+            $MultibyteString,
+            -1,
+            PREG_SPLIT_NO_EMPTY
+        );
+
+        $Return = [];
+
+        while (count($MultibyteArray)) {
+
+            // Remove the number of multibyte charictars specified
+            $Splice = array_splice($MultibyteArray, 0, $Octets);
+
+            while (
+                // Verify the length in octets
+                strlen(
+                    $ImplodedString = implode('', $Splice)
+                ) > $Octets
+            ) {
+
+                // If there is only one multibyte character, keep it
+                //  (otherwise infinite loop possible)
+                if (count($Splice) == 1) {
+                    break;
+                }
+
+                // If too long, put one multibyte character back
+                array_unshift($MultibyteArray, array_pop($Splice));
+            }
+
+            // If correct length, append to the return array
+            $Return[] = $ImplodedString;
+        }
+
+        // Return the array
+        return $Return;
     }
 
     /**

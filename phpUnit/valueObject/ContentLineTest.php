@@ -210,20 +210,23 @@ class ContentLineTest extends \PHPUnit_Framework_TestCase
      */
     public function testFoldString()
     {
-        $Supplied = <<<TEXT1502264821
-Lines of text SHOULD NOT be longer than 75 octets, excluding the line break. Long content lines SHOULD be split into a multiple line representations using a line "folding" technique. That is, a long line can be split between any two characters by inserting a CRLF immediately followed by a single linear white space character ...
-TEXT1502264821;
+        $Supplied = 'Lines of text SHOULD NOT be longer than 75 octets,'
+            . ' excluding the line break. Long content lines SHOULD be split'
+            . ' into a multiple line representations using a line "folding"'
+            . ' technique. That is, a long line can be split between any two'
+            . ' characters by inserting a CRLF immediately followed by a single'
+            . ' linear white space character ...';
 
         $Expected = ''
-.'Lines of text SHOULD NOT be longer than 75 octets, excluding the line break'
-."\n"
-.' . Long content lines SHOULD be split into a multiple line representations '
-."\n"
-.' using a line "folding" technique. That is, a long line can be split betwee'
-."\n"
-.' n any two characters by inserting a CRLF immediately followed by a single '
-."\n"
-.' linear white space character ...';
+            . 'Lines of text SHOULD NOT be longer than 75 octets, excluding the'
+            . ' line break' . "\n"
+            . ' . Long content lines SHOULD be split into a multiple line'
+            . ' representations ' . "\n"
+            . ' using a line "folding" technique. That is, a long line can be'
+            . ' split betwee' . "\n"
+            . ' n any two characters by inserting a CRLF immediately followed'
+            . ' by a single ' . "\n"
+            . ' linear white space character ...';
 
         $this->assertEquals(
             $Expected,
@@ -242,6 +245,87 @@ TEXT1502264821;
             ContentLine::foldString('1'),
             'Fails if function folds 1 char string incorrectly'
         );
+
+        $this->assertEquals(
+            str_repeat('1', 75),
+            ContentLine::foldString(str_repeat('1', 75)),
+            'Fails if folds string ending in multi-char incorrectly'
+        );
+
+        $this->assertEquals(
+            str_repeat('1', 74)."\n 🍱",
+            ContentLine::foldString(str_repeat('1', 74).'🍱'),
+            'Fails if folds string ending in multi-char incorrectly'
+        );
+
+        // The first charictar of a ContentLine will never be a multi-byte char
+        // as the title always comes first
+
     }
 
+    /**
+     * Verify function splits string without splitting multibyte characters
+     *
+     * @return void
+     */
+    public function testSplitMultibyteString()
+    {
+        $Tests = [
+            [
+                'String' => 'Test🍱',
+                'Length' => 8,
+                'Expected' => ['Test🍱'],
+                'Failure'  => 'string split unnecessarily',
+            ],
+            [
+                'String' => 'Test🍱',
+                'Length' => 7,
+                'Expected' => ['Test', '🍱'],
+                'Failure'  => 'string split incorrectly',
+            ],
+            [
+                'String' => '🍱',
+                'Length' => 4,
+                'Expected' => ['🍱'],
+                'Failure'  => 'string split unnecessarily',
+            ],
+            [
+                'String' => '🍱a🍱bb🍱ccc🍱dddd🍱',
+                'Length' => 3,
+                'Expected' => [
+                    '🍱', 'a', '🍱', 'bb', '🍱', 'ccc', '🍱', 'ddd', 'd', '🍱'
+                ],
+                'Failure'  => 'string split incorrectly',
+            ],
+            [
+                'String' => '',
+                'Length' => 3,
+                'Expected' => [],
+                'Failure'  => 'string split incorrectly',
+            ],
+        ];
+
+        foreach ($Tests as $Test) {
+            extract($Test);
+            $this->assertEquals(
+                $Expected,
+                ContentLine::splitMultibyteString($String, $Length),
+                'Fails if '.$Failure
+            );
+        }
+
+    }
+
+    /**
+     * Verify function throws exception when length < 1 is passed
+     *
+     * @expectedException     \InvalidArgumentException
+     * @expectedExceptionCode 1502275279
+     *
+     * @return void
+     */
+    public function testSplitMultibyteStringLengthTooSmall()
+    {
+        ContentLine::splitMultibyteString('', 0);
+    }
 }
