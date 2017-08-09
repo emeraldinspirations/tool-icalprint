@@ -13,6 +13,7 @@
     },
     "autoload": {
         "psr-4": {
+            "emeraldinspirations\\tool\\iCalPrint\\valueObject\\" : "valueObject/"
         }
     }
 }
