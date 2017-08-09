@@ -130,9 +130,30 @@ class ContentLine
     }
 
     /**
+     * Fold the string at 75 octets, add hanging indent of 1 char
+     *
+     * @param string $Value The string to fold
+     *
+     * @return string
+     */
+    static function foldString(string $Value) : string
+    {
+        $SPLIT_LENGTH = 74;
+
+        // All lines after the first are indented by 1 char.  In order to
+        //  simply the code, extract the first character.  Then re-prepend it
+        //  to the result so the wrap can be the same length throughout.
+        $FirstChar = substr($Value, 0, 1);
+        $Array = str_split(substr($Value, 1), $SPLIT_LENGTH);
+
+        return $FirstChar . implode("\n ", $Array);
+    }
+
+    /**
      * Build new ContentLine value object
      *
      * @param string $Field The content line field name
+     * @param string $Value The content line value
      *
      * @return void
      */

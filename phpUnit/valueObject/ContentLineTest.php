@@ -203,14 +203,45 @@ class ContentLineTest extends \PHPUnit_Framework_TestCase
 
     }
 
-    // /**
-    //  * Verify function exists
-    //  *
-    //  * @return void
-    //  */
-    // public function testFoldString()
-    // {
-    //     $Source = ''
-    // }
+    /**
+     * Verify function wrapps string every 75 octets with 1 char hanging indent
+     *
+     * @return void
+     */
+    public function testFoldString()
+    {
+        $Supplied = <<<TEXT1502264821
+Lines of text SHOULD NOT be longer than 75 octets, excluding the line break. Long content lines SHOULD be split into a multiple line representations using a line "folding" technique. That is, a long line can be split between any two characters by inserting a CRLF immediately followed by a single linear white space character ...
+TEXT1502264821;
+
+        $Expected = ''
+.'Lines of text SHOULD NOT be longer than 75 octets, excluding the line break'
+."\n"
+.' . Long content lines SHOULD be split into a multiple line representations '
+."\n"
+.' using a line "folding" technique. That is, a long line can be split betwee'
+."\n"
+.' n any two characters by inserting a CRLF immediately followed by a single '
+."\n"
+.' linear white space character ...';
+
+        $this->assertEquals(
+            $Expected,
+            ContentLine::foldString($Supplied),
+            'Fails if function dosn\'t exist, or folds string incorrectly'
+        );
+
+        $this->assertEquals(
+            '',
+            ContentLine::foldString(''),
+            'Fails if function folds 0 char string incorrectly'
+        );
+
+        $this->assertEquals(
+            '1',
+            ContentLine::foldString('1'),
+            'Fails if function folds 1 char string incorrectly'
+        );
+    }
 
 }
