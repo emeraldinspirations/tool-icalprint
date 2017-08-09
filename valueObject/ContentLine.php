@@ -44,4 +44,28 @@ namespace emeraldinspirations\tool\iCalPrint\valueObject;
 class ContentLine
 {
 
+    protected $Field;
+
+    /**
+     * Return the name of the field
+     *
+     * @return string
+     */
+    public function getField() : string
+    {
+        return $this->Field;
+    }
+
+    /**
+     * Build new ContentLine value object
+     *
+     * @param string $Field The content line field name
+     *
+     * @return void
+     */
+    public function __construct(string $Field)
+    {
+        $this->Field = $Field;
+    }
+    
 }

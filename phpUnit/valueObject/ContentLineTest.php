@@ -29,6 +29,23 @@ namespace emeraldinspirations\tool\iCalPrint\valueObject;
 class ContentLineTest extends \PHPUnit_Framework_TestCase
 {
 
+    protected $Field;
+    protected $Object;
+
+    /**
+     * Run before each test
+     *
+     * @return void
+     */
+    public function setUp()
+    {
+
+        $this->Object = new ContentLine(
+            $this->Field = microtime()
+        );
+
+    }
+
     /**
      * Verify object is constructable
      *
@@ -39,8 +56,31 @@ class ContentLineTest extends \PHPUnit_Framework_TestCase
 
         $this->assertInstanceOf(
             ContentLine::class,
-            new ContentLine(),
+            $this->Object,
             'Fails if object doesn\'t exist, or fails durring construction'
+        );
+
+    }
+
+    /**
+     * Verify function exists & returns correct value
+     *
+     * @return void
+     */
+    public function testGetField()
+    {
+
+        $this->assertTrue(
+            is_string(
+                $this->Object->getField()
+            ),
+            'Fails if function doesn\'t exist, returns non-string'
+        );
+
+        $this->assertEquals(
+            $this->Field,
+            $this->Object->getField(),
+            'Fails if value not retained'
         );
 
     }
