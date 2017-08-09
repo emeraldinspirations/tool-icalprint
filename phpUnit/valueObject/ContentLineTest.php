@@ -42,7 +42,7 @@ class ContentLineTest extends \PHPUnit_Framework_TestCase
     {
 
         $this->Object = new ContentLine(
-            $this->Field = microtime(),
+            $this->Field = $this->generateField(),
             $this->Value = microtime()
         );
 
@@ -401,6 +401,96 @@ class ContentLineTest extends \PHPUnit_Framework_TestCase
             'Fails if line not escaped and folded'
         );
 
+    }
+
+    /**
+     * Return array of invalid values and respective messages
+     *
+     * @return array
+     */
+    public function providerValidateFieldValid() : array
+    {
+        return [
+            ['ABCDEF'],
+            ['ABC-DEF'],
+            ['abcdef'],
+            ['123456'],
+        ];
+    }
+
+    /**
+     * Verify returns value passed
+     *
+     * @param string $Value Valid value
+     *
+     * @dataProvider providerValidateFieldValid
+     *
+     * @return void
+     */
+    public function testValidateFieldValid(string $Value)
+    {
+        $this->assertEquals(
+            $Value,
+            ContentLine::validateField($Value),
+            'Fails if function doesn\'t exist or parameter not returned on'
+            . ' valid value'
+        );
+    }
+
+    /**
+     * Return array of invalid values and respective messages
+     *
+     * @return array
+     */
+    public function providerValidateFieldInvalid() : array
+    {
+        return [
+            ['ABC DEF'],
+            ['ABC.DEF'],
+            [''],
+        ];
+    }
+
+    /**
+     * Verify throws exception when invalid field name is passed
+     *
+     * @param string $Value Invalid value
+     *
+     * @dataProvider          providerValidateFieldInvalid
+     * @expectedException     \InvalidArgumentException
+     * @expectedExceptionCode 1502281804
+     *
+     * @return void
+     */
+    public function testValidateFieldInvalid(string $Value)
+    {
+        ContentLine::validateField($Value);
+    }
+
+    /**
+     * Verify throws exception when invalid field name is passed
+     *
+     * @param string $Field Invalid value
+     *
+     * @dataProvider          providerValidateFieldInvalid
+     * @expectedException     \InvalidArgumentException
+     * @expectedExceptionCode 1502281804
+     *
+     * @return void
+     */
+    public function testConstructInvalidField(string $Field)
+    {
+        new ContentLine($Field, microtime());
+    }
+
+    /**
+     * Return valid Field
+     *
+     * @return string
+     */
+    protected function generateField() : string
+    {
+        return str_replace([' ','.'], ['-','a'], microtime());
     }
 
 }

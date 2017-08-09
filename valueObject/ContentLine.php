@@ -248,6 +248,33 @@ class ContentLine
     }
 
     /**
+     * Verify field matches requirements, throw exception if it doesn't
+     *
+     * Field MUST:
+     * * Be non-empty
+     * * Have only alpha/numeric and hiphen characters
+     *
+     * @param string $Field The value to be validated
+     *
+     * @throws \InvalidArgumentException When the value passed does not meet
+     *                                   requirements
+     *
+     * @return string
+     */
+    static function validateField(string $Field) : string
+    {
+        
+        if (!preg_match('/^[a-zA-Z0-9\-]+$/', $Field)) {
+            throw new \InvalidArgumentException(
+                'Unable to recognize field',
+                1502281804
+            );
+        }
+
+        return $Field;
+    }
+
+    /**
      * Build new ContentLine value object
      *
      * @param string $Field The content line field name
@@ -259,7 +286,7 @@ class ContentLine
         string $Field,
         string $Value
     ) {
-        $this->Field = $Field;
+        $this->Field = self::validateField($Field);
         $this->Value = $Value;
     }
 
