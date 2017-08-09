@@ -204,6 +204,32 @@ class ContentLineTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * Verifty unwrapps string, removing hanging indent
+     *
+     * @return void
+     */
+    public function testUnfoldString()
+    {
+        $this->assertTrue(
+            is_string(ContentLine::unfoldString('')),
+            'Function doesn\'t exist, or returns wrong type'
+        );
+
+        $this->assertEquals(
+            'This is an unfolded string',
+            ContentLine::unfoldString(
+                ''
+                . 'This ' . "\n"        // Verify when space at end of line
+                . 'is' . "\n"           // Verify when hanging indent omitted
+                . '  an unf' . "\n"     // Verify when space at begining of line
+                . 'olded st' . "\n"     // Verify when mid-word split
+                . "\t" . 'ring'         // Verify when tab used for indent
+            ),
+            'Fails if string unfolded incorrectly'
+        );
+    }
+
+    /**
      * Verify function wrapps string every 75 octets with 1 char hanging indent
      *
      * @return void

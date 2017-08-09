@@ -150,6 +150,27 @@ class ContentLine
     }
 
     /**
+     * Unfold a folded string, remove hanging indent
+     *
+     * @param string $Value The string to be unfolded
+     *
+     * @see self::foldString
+     * @see http://www.rexegg.com/regex-quickstart.html
+     *
+     * @return string
+     */
+    static function unfoldString(string $Value) : string
+    {
+        
+        /* Regular Expression Key
+         * / ... /  = The contents of the expression
+         * [\r|\n]+ = At least 1 newline charictar (CR and/or LF)
+         * [\h]?    = 1 or less whitespace characters (ex: space / tab)
+         */
+        return preg_replace('/[\r|\n]+[\h]?/', '', $Value);
+    }
+
+    /**
      * Split string including multibyte chars per octet preserving chars
      *
      * When splitting a string using `str_split` that may include multibyte
