@@ -70,7 +70,7 @@ class ContentLine
     /**
      * Escape characters in supplied string as needed for Value
      *
-     * Function will escape `\` as `\\` and cr/lf as `\n
+     * Function will escape `\` as `\\` and cr/lf as `\n`
      *
      * @param string $Value The string to escape
      *
@@ -78,6 +78,7 @@ class ContentLine
      */
     static function escapeString(string $Value) : string
     {
+
         $Filter = [
             '\\'   => '\\\\',
             "\r\n" => '\\n',
@@ -90,23 +91,43 @@ class ContentLine
             array_values($Filter),
             $Value
         );
-
     }
-    //
-    // // First remove backslashes by using them as a delimiter for an array
-    // $Exploded = explode('\\', $Value);
-    //
-    // // Then iterate through the array to extract each of the newline values
-    // foreach($Exploded as &$Segment) {
-    //     $Segment = preg_replace(
-    //         '/(\r\n|\n|\r)/',
-    //         '\\n',
-    //         $Segment
-    //     );
-    // }
-    //
-    // // Put the array back together using double backslashes
-    // return implode('\\\\', $Exploded);
+
+    /**
+     * Unescape characters in supplied string as needed for Value
+     *
+     * Function will unescape `\\` as `\` and `n` as line feed
+     *
+     * There is an unusual cercumstance where the original string was "\n".
+     * This would then be parsed to "\\n" but when unparsing using str_replace
+     * the \n would be converted to either backslash-linefeed or simply
+     * linefeed.  Threfore it is neccessary to extract all the double
+     * backslashes (i.e. escaped backslashes) before looking for the escaped
+     * linebreaks.
+     *
+     * @param string $Value The string to unescape
+     *
+     * @return string
+     */
+    static function unescapeString(string $Value) : string
+    {
+
+
+        // Remove escaped backslashes by using them as a delimiter for an array
+        $Exploded = explode('\\\\', $Value);
+
+        // Iterate through the array, unescape the newline values
+        foreach ($Exploded as &$Segment) {
+            $Segment = str_replace(
+                '\\n',
+                "\n",
+                $Segment
+            );
+        }
+
+        // Put the array back together using backslashes
+        return implode('\\', $Exploded);
+    }
 
     /**
      * Build new ContentLine value object

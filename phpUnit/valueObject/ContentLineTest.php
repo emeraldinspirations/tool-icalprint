@@ -124,7 +124,12 @@ class ContentLineTest extends \PHPUnit_Framework_TestCase
             [
                 'Supplied' => "This is \\\n a test",
                 'Expected' => 'This is \\\\\\n a test',
-                'Failure'  => 'Backslash - Line Feed not escaped',
+                'Failure'  => 'Backslash-Linefeed not escaped',
+            ],
+            [
+                'Supplied' => 'This is \\n a test',
+                'Expected' => 'This is \\\\n a test',
+                'Failure'  => 'Backslash-N not escaped',
             ],
             [
                 'Supplied' => "This is \n a test",
@@ -152,6 +157,46 @@ class ContentLineTest extends \PHPUnit_Framework_TestCase
             $this->assertEquals(
                 $Test['Expected'],
                 ContentLine::escapeString($Test['Supplied']),
+                'Fails if ' . $Test['Failure']
+            );
+        }
+
+    }
+
+    /**
+     * Verify function un-escapes the required values inside supplied string
+     *
+     * @return void
+     */
+    public function testUnescapeString()
+    {
+        $Tests = [
+            [
+                'Supplied' => 'This is \\\\ a test',
+                'Expected' => 'This is \\ a test',
+                'Failure'  => 'Backslash not unescaped',
+            ],
+            [
+                'Supplied' => 'This is \\\\n a test',
+                'Expected' => 'This is \\n a test',
+                'Failure'  => 'Backslash-N not unescaped',
+            ],
+            [
+                'Supplied' => 'This is \\n a test',
+                'Expected' => "This is \n a test",
+                'Failure'  => 'Line Feed not unescaped',
+            ],
+        ];
+
+        $this->assertTrue(
+            is_string(ContentLine::unescapeString('')),
+            'Fails if function doesn\'t exist, returns non-string'
+        );
+
+        foreach ($Tests as $Test) {
+            $this->assertEquals(
+                $Test['Expected'],
+                ContentLine::unescapeString($Test['Supplied']),
                 'Fails if ' . $Test['Failure']
             );
         }
