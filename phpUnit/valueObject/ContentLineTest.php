@@ -354,4 +354,53 @@ class ContentLineTest extends \PHPUnit_Framework_TestCase
     {
         ContentLine::splitMultibyteString('', 0);
     }
+
+    /**
+     * Verify returns escaped and folded Field / Value string
+     *
+     * @return void
+     */
+    public function testToString()
+    {
+
+        $this->assertEquals(
+            $this->Object->toString(),
+            (string)$this->Object,
+            'Fails if __toString or toString functions don\'t exist or return'
+            . ' different values'
+        );
+
+        $this->assertEquals(
+            $this->Field . ':' . $this->Value,
+            $this->Object->toString(),
+            'Fails if Field and Value not concatenated'
+        );
+
+        $this->Value = ''
+            . str_repeat('1', 20)
+            . '\\'
+            . str_repeat('2', 20)
+            . "\n"
+            . str_repeat('3', 8)
+            . '🍱';
+
+        $Expected = ''
+            . $this->Field
+            . ':'
+            . str_repeat('1', 20)
+            . '\\\\'
+            . str_repeat('2', 20)
+            . '\\n'
+            . str_repeat('3', 8)
+            . "\n "
+            . '🍱';
+
+        $this->assertEquals(
+            $Expected,
+            (new ContentLine($this->Field, $this->Value))->toString(),
+            'Fails if line not escaped and folded'
+        );
+
+    }
+
 }

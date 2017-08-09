@@ -161,7 +161,7 @@ class ContentLine
      */
     static function unfoldString(string $Value) : string
     {
-        
+
         /* Regular Expression Key
          * / ... /  = The contents of the expression
          * [\r|\n]+ = At least 1 newline charictar (CR and/or LF)
@@ -261,6 +261,34 @@ class ContentLine
     ) {
         $this->Field = $Field;
         $this->Value = $Value;
+    }
+
+    /**
+     * Return escaped and folded Field / Value string
+     *
+     * @see self::__toString
+     *
+     * @return string
+     */
+    public function toString() : string
+    {
+        return self::foldString(
+            self::escapeString(
+                $this->Field . ':' . $this->Value
+            )
+        );
+    }
+
+    /**
+     * Return escaped and folded Field / Value string
+     *
+     * @see self::toString Alias for
+     *
+     * @return string
+     */
+    public function __toString() : string
+    {
+        return $this->toString();
     }
 
 }
