@@ -15,6 +15,8 @@
 
 namespace emeraldinspirations\tool\iCalPrint\entity;
 
+use emeraldinspirations\tool\iCalPrint\valueObject\ContentLine;
+
 /**
  * Unit tests for Vevent entity
  *
@@ -42,6 +44,33 @@ class VeventTest extends \PHPUnit_Framework_TestCase
             new Vevent(),
             'Fails if class doesn\'t exist'
         );
+
+    }
+
+    /**
+     * Verify returns array of ContentLine value objects
+     *
+     * @return void
+     */
+    public function testGetUnrecognizedContentLines()
+    {
+
+        $UnrecognizedContentLines
+            = (new Vevent())->getUnrecognizedContentLines();
+        // Fails if function dosn't exist
+
+        $this->assertTrue(
+            is_array($UnrecognizedContentLines),
+            'Fails if returns non-array'
+        );
+
+        foreach ($UnrecognizedContentLines as $Line) {
+            $this->assertInstanceOf(
+                ContentLine::class,
+                $Line,
+                'Fails if array contains non ConentLine value object'
+            );
+        }
 
     }
 
