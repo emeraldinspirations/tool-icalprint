@@ -13,7 +13,9 @@
     },
     "autoload": {
         "psr-4": {
-            "emeraldinspirations\\tool\\iCalPrint\\valueObject\\" : "valueObject/"
+            "emeraldinspirations\\tool\\iCalPrint\\valueObject\\" : "valueObject/",
+            "emeraldinspirations\\tool\\iCalPrint\\entity\\" : "entity/",
+            "emeraldinspirations\\tool\\iCalPrint\\" : "src/"
         }
     }
 }
