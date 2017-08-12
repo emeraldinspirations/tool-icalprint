@@ -48,30 +48,81 @@ class VeventTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * Verify returns array of ContentLine value objects
+     * Verify sets / returns array of ContentLine value objects
      *
      * @return void
      */
-    public function testGetUnrecognizedContentLines()
+    public function testUnrecognizedContentLines()
     {
 
-        $UnrecognizedContentLines
-            = (new Vevent())->getUnrecognizedContentLines();
-        // Fails if function dosn't exist
+        $Object = new Vevent();
+
+        $NewContent = [
+            $this->generateRandomContentLine(),
+            $this->generateRandomContentLine(),
+            $this->generateRandomContentLine(),
+        ];
+
+        $NewInstance = $Object
+            ->withUnrecognizedContentLines($NewContent);
+
+        $this->assertNotSame(
+            $Object,
+            $NewInstance,
+            'Fails if object immutability not maintained'
+        );
+
+        $Actual = $NewInstance->getUnrecognizedContentLines();
 
         $this->assertTrue(
-            is_array($UnrecognizedContentLines),
+            is_array($Actual),
             'Fails if returns non-array'
         );
 
-        foreach ($UnrecognizedContentLines as $Line) {
-            $this->assertInstanceOf(
-                ContentLine::class,
-                $Line,
-                'Fails if array contains non ConentLine value object'
+        $this->assertEquals(
+            $NewContent,
+            $Actual,
+            'Fails if stored data not matching passed value'
+        );
+
+        foreach ($Actual as $Key => $Value) {
+            $this->assertSame(
+                $NewContent[$Key],
+                $Value,
+                'Fails if stored data not matching passed value'
             );
         }
 
+        $Cloned = clone $NewInstance;
+        $ClonedActual = $Cloned->getUnrecognizedContentLines();
+
+        $this->assertNotSame(
+            $NewInstance,
+            $Cloned,
+            'Fails if stored data not cloned'
+        );
+
+        foreach ($ClonedActual as $Key => $Value) {
+            $this->assertNotSame(
+                $NewContent[$Key],
+                $Value,
+                'Fails if stored data not cloned'
+            );
+        }
+
+    }
+
+    /**
+     * Return valid random ContentLine
+     *
+     * @return string
+     */
+    protected function generateRandomContentLine() : ContentLine
+    {
+        return new ContentLine(
+            str_replace([' ','.'], ['-','a'], microtime()),
+            microtime()
+        );
     }
 
 }
