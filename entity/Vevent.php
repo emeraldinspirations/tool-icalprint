@@ -16,6 +16,7 @@
 namespace emeraldinspirations\tool\iCalPrint\entity;
 
 use emeraldinspirations\tool\iCalPrint\valueObject\ContentLine;
+use emeraldinspirations\library\objectDesignPattern\immutable\ImmutableTrait;
 
 /**
  * Vevent entity
@@ -25,13 +26,15 @@ use emeraldinspirations\tool\iCalPrint\valueObject\ContentLine;
  * @author    Matthew "Juniper" Barlett <emeraldinspirations@gmail.com>
  * @copyright 2017 Matthew "Juniper" Barlett <emeraldinspirations@gmail.com>
  * @license   MIT ../LICENSE.md
- * @version   GIT: $Id: f627306671268e7a24c3809def44b16abd93065a $ In Development.
+ * @version   GIT: $Id$ In Development.
  * @link      https://github.com/emeraldinspirations/tool-icalprint
  */
 class Vevent
 {
+    use ImmutableTrait;
 
     protected $UnrecognizedContentLines = [];
+    protected $Description = '';
 
     /**
      * Return content lines that are not recognized
@@ -51,17 +54,62 @@ class Vevent
     }
 
     /**
-     * Create new instance with new UnrecognizedContentLine array
+     * Return event description
      *
-     * @param array $UnrecognizedContentLines New value
+     * @return string
+     */
+    public function getDescription() : string
+    {
+        return $this->Description;
+    }
+
+    /**
+     * Return array of content lines, including unrecognized lines
+     *
+     * @return array Note: May contain non ContentLine value objects
+     */
+    public function toContentLineArray()
+    {
+        return array_merge(
+            [],
+            ...[
+                [ new ContentLine('DESCRIPTION', $this->Description)],
+                $this->UnrecognizedContentLines,
+            ]
+        );
+    }
+
+    /**
+     * Build Vevent from array of ContentLine value objects
+     *
+     * @param array $ContentLineArray Array to be parsed
      *
      * @return self
      */
-    public function withUnrecognizedContentLines(
-        array $UnrecognizedContentLines
-    ) : self {
-        $Return = clone $this;
-        $Return->UnrecognizedContentLines = $UnrecognizedContentLines;
+    static function fromContentLineArray(array $ContentLineArray) : self
+    {
+
+        $Return = new self();
+
+        $Parser = [
+            'DESCRIPTION' => function (string $Value) use ($Return) {
+                $Return->Description = $Value;
+            },
+        ];
+
+        foreach ($ContentLineArray as $ContentLine) {
+
+            if (! $ContentLine instanceof ContentLine) {
+                // Don't attempt to parse
+            } elseif (isset($Parser[$ContentLine->getField()])) {
+                $Parser[$ContentLine->getField()]($ContentLine->getValue());
+                continue;
+            }
+
+            $Return->UnrecognizedContentLines[] = $ContentLine;
+
+        }
+
         return $Return;
     }
 
@@ -73,29 +121,12 @@ class Vevent
     public function __clone()
     {
 
-        // Create recersive function to clone properties
-        $CloneArrayRecursively = function (
-            array &$Array
-        ) use (
-            &$CloneArrayRecursively
-        ) {
-            foreach ($Array as &$Value) {
-                if (is_array($Value)) {
-                    $CloneArrayRecursively($Value);
-                } elseif (is_object($Value)) {
-                    $Value = clone $Value;
-                }
-                // If non-object and non-array then no cloning is neccessary
-            }
-        };
-
         // Create an array of references to properties to clone
         $PropertiesToByCloned = [
             &$this->UnrecognizedContentLines,
         ];
 
-        // Clone properties referenced in array
-        $CloneArrayRecursively($PropertiesToByCloned);
+        ImmutableTrait::CloneArrayRecursively($PropertiesToByCloned);
 
     }
 
