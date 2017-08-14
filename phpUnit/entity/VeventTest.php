@@ -181,6 +181,55 @@ class VeventTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * Verify function returns array containing 1 or 0 elements
+     *
+     * @return void
+     */
+    public function testOptionalContentLine()
+    {
+        $RandomContentLine = $this->generateRandomContentLine();
+
+        $this->assertEquals(
+            [],
+            Vevent::optionalContentLine(
+                $RandomContentLine->getField(),
+                null
+            ),
+            'Fails if function doesn\'t exist, or returns non empty array'
+        );
+
+        /* Due to the [Robustness_principle][1]
+         *
+         * > Be conservative in what you send, be liberal in what you accept
+         *
+         * it is possible that the supplied value may be an empty string.  This
+         * is ommitted in the output
+         *
+         * [1][https://en.wikipedia.org/wiki/Robustness_principle]
+         */
+
+        $this->assertEquals(
+            [],
+            Vevent::optionalContentLine(
+                $RandomContentLine->getField(),
+                ''
+            ),
+            'Fails if function returns Content Line with empty string for a'
+            . ' value'
+        );
+
+        $this->assertEquals(
+            [$RandomContentLine],
+            Vevent::optionalContentLine(
+                $RandomContentLine->getField(),
+                $RandomContentLine->getValue()
+            ),
+            'Fails if function returns empty array instead of Content Line'
+        );
+
+    }
+
+    /**
      * Verify Description parsed, returned, and re-encoded
      *
      * @return void
@@ -193,6 +242,25 @@ class VeventTest extends \PHPUnit_Framework_TestCase
                 'Field'           => 'DESCRIPTION',
                 'ValueSerialized' => microtime(),
                 'GetFunction'     => 'getDescription',
+                'IsType'          => 'is_string',
+            ]
+        );
+
+    }
+
+    /**
+     * Verify Location parsed, returned, and re-encoded
+     *
+     * @return void
+     */
+    public function testGetLocation()
+    {
+
+        $this->genericParserTest(
+            [
+                'Field'           => 'LOCATION',
+                'ValueSerialized' => microtime(),
+                'GetFunction'     => 'getLocation',
                 'IsType'          => 'is_string',
             ]
         );
@@ -234,13 +302,22 @@ class VeventTest extends \PHPUnit_Framework_TestCase
 
         extract($Params);
 
-        $LineInital = new ContentLine($Field, $ValueSerialized);
+        $LineInital  = new ContentLine($Field, $ValueSerialized);
+
+        $EmptyEntity = Vevent::fromContentLineArray([]);
+
+        $this->assertTrue(
+            $IsType($EmptyEntity->$GetFunction()),
+            'Fails if GET function for ' . $Field
+            . ' doesn\'t exist, or returns wrong type on empty'
+        );
+
         $Entity     = Vevent::fromContentLineArray([$LineInital]);
 
         $this->assertTrue(
             $IsType($Entity->$GetFunction()),
             'Fails if GET function for ' . $Field
-            . ' doesn\'t exist, or returns wrong type'
+            . ' returns wrong type on non-empty'
         );
 
         // TODO: Replace with $IsEqual($ValueObject, $Object->$GetFunction())

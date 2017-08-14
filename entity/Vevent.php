@@ -34,8 +34,9 @@ class Vevent
     use ImmutableTrait;
 
     protected $UnrecognizedContentLines = [];
-    protected $Description = '';
-    protected $Summary = '';
+    protected $Description;
+    protected $Summary;
+    protected $Location;
 
     /**
      * Return content lines that are not recognized
@@ -61,7 +62,7 @@ class Vevent
      */
     public function getDescription() : string
     {
-        return $this->Description;
+        return $this->Description ?? '';
     }
 
     /**
@@ -71,21 +72,77 @@ class Vevent
      */
     public function getSummary() : string
     {
-        return $this->Summary;
+        return $this->Summary ?? '';
+    }
+
+    /**
+     * Return event location
+     *
+     * @return string
+     */
+    public function getLocation() : string
+    {
+        return $this->Location ?? '';
+    }
+
+    /**
+     * Return array containing ContentLine value object if value not null
+     *
+     * Per the DRY principle, the oporation of: creating a single-element array
+     * if the specified field has a value, or a zero-element array if the field
+     * is empty / zero-length string; has been refactored to it's own procedure.
+     *
+     * @param string $Field Filed of the ContentLine object
+     * @param string $Value (Optional) Value of the ContentLine object
+     *
+     * @see self::toContentLineArray Calling function
+     *
+     * @return array
+     */
+    static function optionalContentLine(
+        string $Field,
+        string $Value = null
+    ) : array {
+        if (! isset($Value)) {
+            return [];
+        }
+
+        if ($Value == '') {
+            return [];
+        }
+
+        return [new ContentLine($Field, $Value)];
     }
 
     /**
      * Return array of content lines, including unrecognized lines
      *
+     * WHEREAS some fields may have multiple values, AND
+     * WHEREAS the easiest way to merge arrays of these values is to use the
+     *         built-in array_merge, AND
+     * WHEREAS it is easy to encapsulate individual values in single element
+     *         arrays, AND
+     * WHEREAS zero-length arrays are ignored by array_merge, AND
+     * WHEREAS all fields are optional, AND
+     * WHEREAS arrays in PHP can have commas at the end of the final values
+     *         which allows easy re-ordering and single-line revisions (vs.
+     *         multiple lines when the last element MUST omit it's comment), AND
+     * WHEREAS the new PHP 7 scalar operator (`...`) allows converting an array
+     *         to the parameters of a function (including array_merge);
+     * THEREFORE for code simplicity, the array is built by merging arrays of
+     *           each field's individual array of values,
+     *
      * @return array Note: May contain non ContentLine value objects
      */
     public function toContentLineArray()
     {
+
         return array_merge(
             [],
             ...[
-                [ new ContentLine('DESCRIPTION', $this->Description)],
-                [ new ContentLine('SUMMARY', $this->Summary)],
+                self::optionalContentLine('DESCRIPTION', $this->Description),
+                self::optionalContentLine('LOCATION', $this->Location),
+                self::optionalContentLine('SUMMARY', $this->Summary),
                 $this->UnrecognizedContentLines,
             ]
         );
@@ -109,6 +166,9 @@ class Vevent
             },
             'SUMMARY' => function (string $Value) use ($Return) {
                 $Return->Summary = $Value;
+            },
+            'LOCATION' => function (string $Value) use ($Return) {
+                $Return->Location = $Value;
             },
         ];
 
