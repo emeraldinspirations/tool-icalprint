@@ -187,28 +187,76 @@ class VeventTest extends \PHPUnit_Framework_TestCase
      */
     public function testGetDescription()
     {
-        $Key         = 'DESCRIPTION';
-        $Description = microtime();
-        $ValueObject = new ContentLine($Key, $Description);
-        $Object      = Vevent::fromContentLineArray([$ValueObject]);
 
-        $this->assertTrue(
-            is_string($Object->getDescription()),
-            'Fails if function doesn\'t exist, or returns non-string'
+        $this->genericParserTest(
+            [
+                'Field'           => 'DESCRIPTION',
+                'ValueSerialized' => microtime(),
+                'GetFunction'     => 'getDescription',
+                'IsType'          => 'is_string',
+            ]
         );
 
+    }
+
+    /**
+     * Verify Summary parsed, returned, and re-encoded
+     *
+     * @return void
+     */
+    public function testGetSummary()
+    {
+
+        $this->genericParserTest(
+            [
+                'Field'           => 'SUMMARY',
+                'ValueSerialized' => microtime(),
+                'GetFunction'     => 'getSummary',
+                'IsType'          => 'is_string',
+            ]
+        );
+
+    }
+
+    /**
+     * Test that ContentLine parses, returned, and re-encoded
+     *
+     * @param array $Params The paramerters required
+     *        string   $Field
+     *        string   $ValueSerialized
+     *        string   $GetFunction
+     *        callable $IsType
+     *
+     * @return void
+     */
+    protected function genericParserTest(array $Params)
+    {
+
+        extract($Params);
+
+        $LineInital = new ContentLine($Field, $ValueSerialized);
+        $Entity     = Vevent::fromContentLineArray([$LineInital]);
+
+        $this->assertTrue(
+            $IsType($Entity->$GetFunction()),
+            'Fails if GET function for ' . $Field
+            . ' doesn\'t exist, or returns wrong type'
+        );
+
+        // TODO: Replace with $IsEqual($ValueObject, $Object->$GetFunction())
         $this->assertEquals(
-            $Description,
-            $Object->getDescription(),
-            'Fails if description not parsed out, or returned'
+            $ValueSerialized,
+            $Entity->$GetFunction(),
+            'Fails if ' . $Field . ' not parsed correctly, or not returned '
+            . 'from GET function'
         );
 
         while (true) {
 
-            foreach ($Object->toContentLineArray() as $ContentLine) {
+            foreach ($Entity->toContentLineArray() as $LinePost) {
 
-                if ($ContentLine->getField() == $Key
-                    && $ContentLine->getValue() == $Description
+                if ($LinePost->getField() == $Field
+                    && $LinePost->getValue() == $ValueSerialized
                 ) {
                     // Test passes
                     $this->assertTrue(true);
@@ -218,14 +266,12 @@ class VeventTest extends \PHPUnit_Framework_TestCase
             }
 
             $this->fails(
-                'Fails if unable to locate content line in '
-                . 'toContentLineArray array'
+                'Fails if unable to locate content line for ' . $Field
+                . ' in toContentLineArray array'
             );
             break;
 
         }
-
-
     }
 
 }

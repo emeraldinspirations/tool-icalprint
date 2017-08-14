@@ -35,6 +35,7 @@ class Vevent
 
     protected $UnrecognizedContentLines = [];
     protected $Description = '';
+    protected $Summary = '';
 
     /**
      * Return content lines that are not recognized
@@ -64,6 +65,16 @@ class Vevent
     }
 
     /**
+     * Return event summary
+     *
+     * @return string
+     */
+    public function getSummary() : string
+    {
+        return $this->Summary;
+    }
+
+    /**
      * Return array of content lines, including unrecognized lines
      *
      * @return array Note: May contain non ContentLine value objects
@@ -74,6 +85,7 @@ class Vevent
             [],
             ...[
                 [ new ContentLine('DESCRIPTION', $this->Description)],
+                [ new ContentLine('SUMMARY', $this->Summary)],
                 $this->UnrecognizedContentLines,
             ]
         );
@@ -94,6 +106,9 @@ class Vevent
         $Parser = [
             'DESCRIPTION' => function (string $Value) use ($Return) {
                 $Return->Description = $Value;
+            },
+            'SUMMARY' => function (string $Value) use ($Return) {
+                $Return->Summary = $Value;
             },
         ];
 
